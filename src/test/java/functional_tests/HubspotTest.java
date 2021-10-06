@@ -33,27 +33,38 @@ public class HubspotTest {
 
         // todo: each country
         HashMap<String, ArrayList<String>> datePersonMap = new HashMap<>();
+        HashMap<String, ArrayList<Partner>> countryPersonMap = new HashMap<>();
+        ArrayList<Partner> countryList;
         for (Partner p : partners.getPartners()) {
 
-            System.out.println(p.getAvailableDates());
+            if (countryPersonMap.containsKey(p.getCountry())) {
 
+                ArrayList<String> partnersList;
+                if (p.getAvailableDates() != null) {
+                    for (int i = 0; i < p.getAvailableDates().size(); i++) {
 
-            ArrayList<String> partnersList;
-            if (p.getAvailableDates() != null) {
-                for (int i = 0; i < p.getAvailableDates().size(); i++) {
+                        // if key already exists add partner to their array
+                        if (datePersonMap.containsKey(p.getAvailableDates().get(i))) {
+                            partnersList = datePersonMap.get(p.getAvailableDates().get(i));
+                        } else {
+                            partnersList = new ArrayList<>();
+                        }
 
-                    // if key already exists add partner to their array
-                    if (datePersonMap.containsKey(p.getAvailableDates().get(i))) {
-                        partnersList = datePersonMap.get(p.getAvailableDates().get(i));
-                    } else {
-                        partnersList = new ArrayList<>();
+                        partnersList.add(p.getFirstName());
+                        datePersonMap.put(p.getAvailableDates().get(i), partnersList);
                     }
 
-                    partnersList.add(p.firstName);
-                    datePersonMap.put(p.getAvailableDates().get(i), partnersList);
                 }
 
+                countryList = countryPersonMap.get(p.getCountry());
+
             }
+            else {
+                countryList = new ArrayList<>();
+            }
+
+            countryList.add(p);
+            countryPersonMap.put(p.getCountry(), countryList);
 
         }
 
