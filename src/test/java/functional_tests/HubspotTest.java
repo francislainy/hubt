@@ -1,6 +1,5 @@
 package functional_tests;
 
-import functional_tests.model.Countries;
 import functional_tests.model.Country;
 import functional_tests.model.Partner;
 import functional_tests.model.Partners;
@@ -40,10 +39,8 @@ public class HubspotTest {
         HashMap<String, ArrayList<Partner>> countryPersonMap = new HashMap<>();
         ArrayList<Partner> partnerCountryList;
 
-
-
         ArrayList<Country> countriesToPostList = new ArrayList<>();
-
+        HashMap<String, ArrayList<Country>> mapToPost = new HashMap();
 
         for (Partner p : partners.getPartners()) {
 
@@ -63,7 +60,7 @@ public class HubspotTest {
 
         for (String countryName : countryPersonMap.keySet()) {
 
-
+            ArrayList<String> attendeesList = new ArrayList<>();
             for (Partner p : countryPersonMap.get(countryName)) {
 
                 ArrayList<String> partnersList;
@@ -77,7 +74,7 @@ public class HubspotTest {
                             partnersList = new ArrayList<>();
                         }
 
-                        partnersList.add(p.getFirstName());
+                        partnersList.add(p.getEmail());
                         datePersonMap.put(p.getAvailableDates().get(i), partnersList);
                     }
 
@@ -92,11 +89,10 @@ public class HubspotTest {
             int max = 0;
             int partnerAmountCurrentDate;
             int partnerAmountNextDate;
-
+            int keyIndexDate = 0;
 
             Object[] keys = treeMap.keySet().toArray();
             String dateWithMorePartners = (String) keys[0];
-            ArrayList<String> attendeesList = new ArrayList<>();
             for (int i = 0; i < keys.length - 1; i++) {
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -116,45 +112,41 @@ public class HubspotTest {
                         max = partnerAmountCurrentDate + partnerAmountNextDate;
 
                         dateWithMorePartners = (String) keys[i];
-                        attendeesList.addAll(treeMap.get(keys[i]));
+                        keyIndexDate = i;
                         System.out.println(dateWithMorePartners);
 
                     }
                 }
+
             }
 
 
-            System.out.println("Country " + countryName);
-            System.out.println(dateWithMorePartners); // todo: this should be a list for each country and not the total amongst all of them. A person from Ireland won't be going to Canada for this meeting!
+            attendeesList.addAll(treeMap.get(keys[keyIndexDate]));
+
+            System.out.println("Country: " + countryName);
+            System.out.println("Date with more partners: " + dateWithMorePartners); // todo: this should be a list for each country and not the total amongst all of them. A person from Ireland won't be going to Canada for this meeting!
 
 
             Country country = new Country();
-            country.setAttendeeCount(max);
+            country.setAttendeeCount(attendeesList.size());
             country.setName(countryName);
             country.setStartDate(dateWithMorePartners);
             country.setAttendees(attendeesList);
-
-
-
-
-
             countriesToPostList.add(country);
-
-
-
 
         }
 
 
-        HashMap<String, ArrayList<Country>> mapToPost = new HashMap();
         mapToPost.put("countries", countriesToPostList);
 
 
         System.out.println(mapToPost);
 
 
-    }
+        resp = rq.body(mapToPost).post("https://candidate.hubteam.com/candidateTest/v3/problem/result?userKey=c967dc4a03fce49243388aef13f7");
+        assertEquals(200, resp.getStatusCode());
 
+    }
 
 }
 
