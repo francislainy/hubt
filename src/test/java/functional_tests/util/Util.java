@@ -1,6 +1,8 @@
 package functional_tests.util;
 
 import com.github.dzieciou.testing.curl.CurlRestAssuredConfigFactory;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
@@ -8,6 +10,8 @@ import io.restassured.mapper.ObjectMapperType;
 import io.restassured.specification.RequestSpecification;
 import com.github.dzieciou.testing.curl.Options;
 
+
+import java.util.HashMap;
 
 import static io.restassured.RestAssured.given;
 
@@ -41,4 +45,11 @@ public class Util {
                 .everything();
     }
 
+
+    public static <T> T createClassFromMap(HashMap map, Class<T> c) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson = gsonBuilder.create();
+        String jsonString = gson.toJson(map);
+        return gson.fromJson(jsonString, c);
+    }
 }
