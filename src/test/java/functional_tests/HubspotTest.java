@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // mvn -Dtest=functional_tests.*Test test
 
+
 @Slf4j
 public class HubspotTest {
 
@@ -34,7 +35,7 @@ public class HubspotTest {
 
         Partners partners = Util.createClassFromMap(hashmap, Partners.class);
 
-        // todo: each country - 06/10/2021
+
         HashMap<String, ArrayList<String>> datePersonMap = new HashMap<>();
         HashMap<String, ArrayList<Partner>> countryPersonMap = new HashMap<>();
         ArrayList<Partner> partnerCountryList;
@@ -87,24 +88,24 @@ public class HubspotTest {
             treeMap.putAll(datePersonMap); // Sorting the map to make sure the dates are in a sequence
 
             int max = 0;
-            int partnerAmountCurrentDate;
-            int partnerAmountNextDate;
             int keyIndexDate = 0;
 
             Object[] keys = treeMap.keySet().toArray();
             String dateWithMorePartners = (String) keys[0];
+
+            // Map availabity inside the country
             for (int i = 0; i < keys.length - 1; i++) {
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-                partnerAmountCurrentDate = treeMap.get(keys[i]).size();
-                partnerAmountNextDate = treeMap.get(keys[i + 1]).size();
-
+                int partnerAmountCurrentDate = treeMap.get(keys[i]).size();
+                int partnerAmountNextDate = treeMap.get(keys[i + 1]).size();
 
                 LocalDate partnerCurrentLocalDate = LocalDate.parse((String) keys[i], formatter);
                 LocalDate partnerNextLocalDate = LocalDate.parse((String) keys[i + 1], formatter);
 
                 long daysBetween = DAYS.between(partnerCurrentLocalDate, partnerNextLocalDate);
+
 
                 if (daysBetween == 1) { // Checking if the dates come in a sequence
 
@@ -113,20 +114,17 @@ public class HubspotTest {
 
                         dateWithMorePartners = (String) keys[i];
                         keyIndexDate = i;
-                        System.out.println(dateWithMorePartners);
-
                     }
                 }
 
             }
 
 
-            attendeesList.addAll(treeMap.get(keys[keyIndexDate]));
-
             System.out.println("Country: " + countryName);
-            System.out.println("Date with more partners: " + dateWithMorePartners); // todo: this should be a list for each country and not the total amongst all of them. A person from Ireland won't be going to Canada for this meeting!
+            System.out.println("Date with more partners: " + dateWithMorePartners);
 
 
+            attendeesList.addAll(treeMap.get(keys[keyIndexDate]));
             Country country = new Country();
             country.setAttendeeCount(attendeesList.size());
             country.setName(countryName);
@@ -138,10 +136,6 @@ public class HubspotTest {
 
 
         mapToPost.put("countries", countriesToPostList);
-
-
-        System.out.println(mapToPost);
-
 
         resp = rq.body(mapToPost).post("https://candidate.hubteam.com/candidateTest/v3/problem/result?userKey=c967dc4a03fce49243388aef13f7");
         assertEquals(200, resp.getStatusCode());
