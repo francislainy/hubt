@@ -36,10 +36,26 @@ public class HubspotTest {
         // todo: each country - 06/10/2021
         HashMap<String, ArrayList<String>> datePersonMap = new HashMap<>();
         HashMap<String, ArrayList<Partner>> countryPersonMap = new HashMap<>();
-        ArrayList<Partner> countryList;
+        ArrayList<Partner> partnerCountryList;
         for (Partner p : partners.getPartners()) {
 
             if (countryPersonMap.containsKey(p.getCountry())) {
+
+                partnerCountryList = countryPersonMap.get(p.getCountry());
+
+            } else {
+                partnerCountryList = new ArrayList<>();
+            }
+
+            partnerCountryList.add(p);
+            countryPersonMap.put(p.getCountry(), partnerCountryList);
+
+        }
+
+
+        for (String s : countryPersonMap.keySet()) {
+
+            for (Partner p : countryPersonMap.get(s)) {
 
                 ArrayList<String> partnersList;
                 if (p.getAvailableDates() != null) {
@@ -58,56 +74,48 @@ public class HubspotTest {
 
                 }
 
-                countryList = countryPersonMap.get(p.getCountry());
-
-            }
-            else {
-                countryList = new ArrayList<>();
             }
 
-            countryList.add(p);
-            countryPersonMap.put(p.getCountry(), countryList);
 
-        }
+            TreeMap<String, ArrayList<String>> treeMap = new TreeMap<>();
+            treeMap.putAll(datePersonMap); // Sorting the map to make sure the dates are in a sequence
 
-
-        TreeMap<String, ArrayList<String>> treeMap = new TreeMap<>();
-        treeMap.putAll(datePersonMap); // Sorting the map to make sure the dates are in a sequence
-
-        int max = 0;
-        int partnerAmountCurrentDate;
-        int partnerAmountNextDate;
+            int max = 0;
+            int partnerAmountCurrentDate;
+            int partnerAmountNextDate;
 
 
-        Object[] keys = treeMap.keySet().toArray();
-        String dateWithMorePartners = (String) keys[0];
-        for (int i = 0; i < keys.length - 1; i++) {
+            Object[] keys = treeMap.keySet().toArray();
+            String dateWithMorePartners = (String) keys[0];
+            for (int i = 0; i < keys.length - 1; i++) {
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            partnerAmountCurrentDate = treeMap.get(keys[i]).size();
-            partnerAmountNextDate = treeMap.get(keys[i + 1]).size();
+                partnerAmountCurrentDate = treeMap.get(keys[i]).size();
+                partnerAmountNextDate = treeMap.get(keys[i + 1]).size();
 
 
-            LocalDate partnerCurrentLocalDate = LocalDate.parse((String) keys[i], formatter);
-            LocalDate partnerNextLocalDate = LocalDate.parse((String) keys[i+1], formatter);
+                LocalDate partnerCurrentLocalDate = LocalDate.parse((String) keys[i], formatter);
+                LocalDate partnerNextLocalDate = LocalDate.parse((String) keys[i + 1], formatter);
 
-            long daysBetween = DAYS.between(partnerCurrentLocalDate, partnerNextLocalDate);
+                long daysBetween = DAYS.between(partnerCurrentLocalDate, partnerNextLocalDate);
 
-            if (daysBetween == 1) { // Checking if the dates come in a sequence
+                if (daysBetween == 1) { // Checking if the dates come in a sequence
 
-                if (partnerAmountCurrentDate + partnerAmountNextDate > max) {
-                    max = partnerAmountCurrentDate + partnerAmountNextDate;
+                    if (partnerAmountCurrentDate + partnerAmountNextDate > max) {
+                        max = partnerAmountCurrentDate + partnerAmountNextDate;
 
-                    dateWithMorePartners = (String) keys[i];
+                        dateWithMorePartners = (String) keys[i];
 
+                    }
                 }
             }
+
+
+            System.out.println("Country " + s);
+            System.out.println(dateWithMorePartners); // todo: this should be a list for each country and not the total amongst all of them. A person from Ireland won't be going to Canada for this meeting!
         }
-
-
-        System.out.println(dateWithMorePartners); // todo: this should be a list for each country and not the total amongst all of them. A person from Ireland won't be going to Canada for this meeting!
-
+        
     }
 
 
