@@ -25,8 +25,7 @@ public class Util {
                 .updateCurl(curl -> curl
                         .removeHeader("Host")
                         .removeHeader("User-Agent")
-                        .removeHeader("Connection")
-                        .setCookieHeader("location"))
+                        .removeHeader("Connection"))
                 .build();
 
         RestAssuredConfig config = CurlRestAssuredConfigFactory.createConfig(options).objectMapperConfig(new ObjectMapperConfig(ObjectMapperType.GSON));
