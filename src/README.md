@@ -1,4 +1,7 @@
 ## Hubspot Functional tests
+
+https://github.com/francislainy/hubt/tree/master/src
+
 These can be found under the `test/functional_tests` folder. Their dependencies are under the main pom file for the application.
 
 These tests can be run either through a maven command, or a run button inside your IDE.
@@ -36,5 +39,5 @@ Resulting curl:
 - Create methods to make the code smaller and more legible once the current logic can be validated
 
 
-
+https://www.linkedin.com/in/francislainycampos/
 
