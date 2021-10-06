@@ -3,7 +3,7 @@ These can be found under the `test/functional_tests` folder. Their dependencies 
 
 These tests can be run either through a maven command, or a run button inside your IDE.
 
-To target the test classes through the maven command, we tend to follow a naming pattern, in this case, they all end with the word "Test". which is represented by `.*Test` after the package location. 
+To target the test classes through the maven command, we tend to follow a naming pattern, in this case, the class name ending with the word "Test". which is represented by `.*Test` after the package location. 
 The below is a sample for the maven command. Notice we can also provide extra parameters such as which environment we would like our tests to run on.
 
 `mvn -Dtest=functional_tests.*Test test`
