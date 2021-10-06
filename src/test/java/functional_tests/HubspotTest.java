@@ -1,5 +1,7 @@
 package functional_tests;
 
+import functional_tests.model.Countries;
+import functional_tests.model.Country;
 import functional_tests.model.Partner;
 import functional_tests.model.Partners;
 import functional_tests.util.Util;
@@ -37,6 +39,12 @@ public class HubspotTest {
         HashMap<String, ArrayList<String>> datePersonMap = new HashMap<>();
         HashMap<String, ArrayList<Partner>> countryPersonMap = new HashMap<>();
         ArrayList<Partner> partnerCountryList;
+
+
+
+        ArrayList<Country> countriesToPostList = new ArrayList<>();
+
+
         for (Partner p : partners.getPartners()) {
 
             if (countryPersonMap.containsKey(p.getCountry())) {
@@ -53,9 +61,10 @@ public class HubspotTest {
         }
 
 
-        for (String s : countryPersonMap.keySet()) {
+        for (String countryName : countryPersonMap.keySet()) {
 
-            for (Partner p : countryPersonMap.get(s)) {
+
+            for (Partner p : countryPersonMap.get(countryName)) {
 
                 ArrayList<String> partnersList;
                 if (p.getAvailableDates() != null) {
@@ -87,6 +96,7 @@ public class HubspotTest {
 
             Object[] keys = treeMap.keySet().toArray();
             String dateWithMorePartners = (String) keys[0];
+            ArrayList<String> attendeesList = new ArrayList<>();
             for (int i = 0; i < keys.length - 1; i++) {
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -106,16 +116,43 @@ public class HubspotTest {
                         max = partnerAmountCurrentDate + partnerAmountNextDate;
 
                         dateWithMorePartners = (String) keys[i];
+                        attendeesList.addAll(treeMap.get(keys[i]));
+                        System.out.println(dateWithMorePartners);
 
                     }
                 }
             }
 
 
-            System.out.println("Country " + s);
+            System.out.println("Country " + countryName);
             System.out.println(dateWithMorePartners); // todo: this should be a list for each country and not the total amongst all of them. A person from Ireland won't be going to Canada for this meeting!
+
+
+            Country country = new Country();
+            country.setAttendeeCount(max);
+            country.setName(countryName);
+            country.setStartDate(dateWithMorePartners);
+            country.setAttendees(attendeesList);
+
+
+
+
+
+            countriesToPostList.add(country);
+
+
+
+
         }
-        
+
+
+        HashMap<String, ArrayList<Country>> mapToPost = new HashMap();
+        mapToPost.put("countries", countriesToPostList);
+
+
+        System.out.println(mapToPost);
+
+
     }
 
 
