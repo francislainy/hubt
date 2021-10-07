@@ -26,6 +26,109 @@ public class HubspotTest {
     @Test
     public void getResponseFromApi() {
 
+        Partners partners = getPartnersFromRest();
+
+
+        ArrayList<Country> countriesToPostList = new ArrayList<>();
+        HashMap<String, ArrayList<Country>> mapToPost = new HashMap<>();
+
+        // Here we have something like "Canada": {"P1":{}, "P2"" {}}, "Singapore": {"P3": {}, "P4"}, "United Stated": {}
+        HashMap<String, ArrayList<Partner>> countryPersonMap = getCountryAvailablePartners(partners);
+
+        // This gives us a map like  { "2017-06-16" : "["attendee1@emai.com", "attendee2@email.com", "attendee3@emai.com"]", "2017-06-16" : "["attendee2@emai.com", "attendee4@emai.com"]", "2017-06-16" : "[]", "2017-06-16" : "[]"}
+        for (String countryName : countryPersonMap.keySet()) {
+
+            HashMap<String, ArrayList<String>> datePersonMap = getDateAvailablePartners(countryPersonMap, countryName);
+
+
+            ArrayList<String> attendeesList = new ArrayList<>();
+            TreeMap<String, ArrayList<String>> treeMap = new TreeMap<>(datePersonMap); // Sorting the map to make sure the dates are in a sequence
+
+            int max = 0;
+
+            Object[] dates = treeMap.keySet().toArray();
+            String startDateWithMorePartners = (String) dates[0];
+            String endDateWithMorePartners = (String) dates[0];
+
+            // Map availability inside the country
+            for (int i = 0; i < dates.length - 1; i++) {
+
+                if (getDaysBetween(dates, i) == 1) { // Checking if the dates come in a sequence
+
+                    ArrayList<String> currentDateList = treeMap.get(dates[i]);
+                    ArrayList<String> nextDateList = treeMap.get(dates[i + 1]);
+
+                    Collections.sort(currentDateList);
+                    Collections.sort(nextDateList);
+
+                    // Wrong because it's checking whether all in the array for a date are inside the array for the other date. It should be the most amount only.
+
+                    int numElementsBothDates = 0;
+
+
+                    for (String nextDate : nextDateList) {
+                        for (String currentDate : currentDateList) {
+                            if (currentDate.contains(nextDate)) {
+                                numElementsBothDates++;
+                            }
+                        }
+                    }
+
+
+                    if (numElementsBothDates > max) {
+                        max = numElementsBothDates;
+
+
+                        startDateWithMorePartners = (String) dates[i];
+                        endDateWithMorePartners = (String) dates[i + 1];
+
+
+                    }
+
+
+                }
+
+
+            }
+
+
+            System.out.println("Country: " + countryName);
+            System.out.println("Date with more partners: " + startDateWithMorePartners);
+            System.out.println("Attendee count: " + max);
+
+
+            for (Partner p : partners.getPartners()) {
+
+                if (p.getCountry().equals(countryName)) {
+                    if (p.getAvailableDates().contains(startDateWithMorePartners) && p.getAvailableDates().contains(endDateWithMorePartners)) {
+                        attendeesList.add(p.getEmail());
+                    }
+                }
+
+            }
+            
+
+            Country country = new Country();
+            country.setAttendeeCount(max);
+            country.setName(countryName);
+            country.setStartDate(startDateWithMorePartners);
+            country.setAttendees(attendeesList);
+            countriesToPostList.add(country);
+
+
+        }
+
+
+        mapToPost.put("countries", countriesToPostList);
+
+        RequestSpecification rq = getRequestSpecification();
+        Response resp = rq.body(mapToPost).post("https://candidate.hubteam.com/candidateTest/v3/problem/result?userKey=c967dc4a03fce49243388aef13f7");
+        assertEquals(200, resp.getStatusCode());
+
+    }
+
+    private Partners getPartnersFromRest() {
+
         RequestSpecification rq = getRequestSpecification();
         Response resp = rq.get("https://candidate.hubteam.com/candidateTest/v3/problem/dataset?userKey=c967dc4a03fce49243388aef13f7");
 
@@ -33,18 +136,50 @@ public class HubspotTest {
 
         HashMap hashmap = resp.getBody().jsonPath().get();
 
-        Partners partners = Util.createClassFromMap(hashmap, Partners.class);
+        return Util.createClassFromMap(hashmap, Partners.class);
+    }
 
+
+    private long getDaysBetween(Object[] keys, int i) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate partnerCurrentLocalDate = LocalDate.parse((String) keys[i], formatter);
+        LocalDate partnerNextLocalDate = LocalDate.parse((String) keys[i + 1], formatter);
+
+        return DAYS.between(partnerCurrentLocalDate, partnerNextLocalDate);
+    }
+
+    private HashMap getDateAvailablePartners(HashMap<String, ArrayList<Partner>> countryPersonMap, String countryName) {
 
         HashMap<String, ArrayList<String>> datePersonMap = new HashMap<>();
+
+        for (Partner p : countryPersonMap.get(countryName)) {
+
+            ArrayList<String> partnersList;
+
+            for (String date : p.getAvailableDates()) {
+
+                // if the key already exists we add the partner to the array
+                if (datePersonMap.containsKey(date)) {
+                    partnersList = datePersonMap.get(date);
+                } else {
+                    partnersList = new ArrayList<>();
+                }
+
+                partnersList.add(p.getEmail());
+                datePersonMap.put((date), partnersList);
+            }
+
+        }
+
+        return datePersonMap;
+    }
+
+    private HashMap getCountryAvailablePartners(Partners partners) {
         HashMap<String, ArrayList<Partner>> countryPersonMap = new HashMap<>();
-        ArrayList<Partner> partnerCountryList;
-
-        ArrayList<Country> countriesToPostList = new ArrayList<>();
-        HashMap<String, ArrayList<Country>> mapToPost = new HashMap();
-
         for (Partner p : partners.getPartners()) {
 
+            ArrayList<Partner> partnerCountryList;
             if (countryPersonMap.containsKey(p.getCountry())) {
 
                 partnerCountryList = countryPersonMap.get(p.getCountry());
@@ -53,93 +188,17 @@ public class HubspotTest {
                 partnerCountryList = new ArrayList<>();
             }
 
+            if (p.getEmail().equals("bmagnani@hubspotpartners.com")) {
+                log.info(p.country);
+
+            }
+
             partnerCountryList.add(p);
             countryPersonMap.put(p.getCountry(), partnerCountryList);
 
         }
 
-
-        for (String countryName : countryPersonMap.keySet()) {
-
-            ArrayList<String> attendeesList = new ArrayList<>();
-            for (Partner p : countryPersonMap.get(countryName)) {
-
-                ArrayList<String> partnersList;
-                if (p.getAvailableDates() != null) {
-                    for (int i = 0; i < p.getAvailableDates().size(); i++) {
-
-                        // if the key already exists we add the partner to the array
-                        if (datePersonMap.containsKey(p.getAvailableDates().get(i))) {
-                            partnersList = datePersonMap.get(p.getAvailableDates().get(i));
-                        } else {
-                            partnersList = new ArrayList<>();
-                        }
-
-                        partnersList.add(p.getEmail());
-                        datePersonMap.put(p.getAvailableDates().get(i), partnersList);
-                    }
-
-                }
-
-            }
-
-
-            TreeMap<String, ArrayList<String>> treeMap = new TreeMap<>();
-            treeMap.putAll(datePersonMap); // Sorting the map to make sure the dates are in a sequence
-
-            int max = 0;
-            int keyIndexDate = 0;
-
-            Object[] keys = treeMap.keySet().toArray();
-            String dateWithMorePartners = (String) keys[0];
-
-            // Map availabity inside the country
-            for (int i = 0; i < keys.length - 1; i++) {
-
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-                int partnerAmountCurrentDate = treeMap.get(keys[i]).size();
-                int partnerAmountNextDate = treeMap.get(keys[i + 1]).size();
-
-                LocalDate partnerCurrentLocalDate = LocalDate.parse((String) keys[i], formatter);
-                LocalDate partnerNextLocalDate = LocalDate.parse((String) keys[i + 1], formatter);
-
-                long daysBetween = DAYS.between(partnerCurrentLocalDate, partnerNextLocalDate);
-
-
-                if (daysBetween == 1) { // Checking if the dates come in a sequence
-
-                    if (partnerAmountCurrentDate + partnerAmountNextDate > max) {
-                        max = partnerAmountCurrentDate + partnerAmountNextDate;
-
-                        dateWithMorePartners = (String) keys[i];
-                        keyIndexDate = i;
-                    }
-                }
-
-            }
-
-
-            System.out.println("Country: " + countryName);
-            System.out.println("Date with more partners: " + dateWithMorePartners);
-
-
-            attendeesList.addAll(treeMap.get(keys[keyIndexDate]));
-            Country country = new Country();
-            country.setAttendeeCount(attendeesList.size());
-            country.setName(countryName);
-            country.setStartDate(dateWithMorePartners);
-            country.setAttendees(attendeesList);
-            countriesToPostList.add(country);
-
-        }
-
-
-        mapToPost.put("countries", countriesToPostList);
-
-        resp = rq.body(mapToPost).post("https://candidate.hubteam.com/candidateTest/v3/problem/result?userKey=c967dc4a03fce49243388aef13f7");
-        assertEquals(200, resp.getStatusCode());
-
+        return countryPersonMap;
     }
 
 }
