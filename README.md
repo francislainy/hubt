@@ -34,6 +34,9 @@ This printing is handled by an external library which exists within the pom file
 
 ```
 
+![image](https://user-images.githubusercontent.com/19685849/136193569-80a56ed1-ade2-4806-bd52-3489025877d8.png)
+
+
 ## Todo
 - Result 200 successful status code
 - Create methods to make the code smaller and more legible once the current logic can be validated
