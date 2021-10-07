@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class HubspotTest {
 
     @Test
-    public void getResponseFromApi() {
+    public void testHubspot() {
 
         Partners partners = getPartnersFromRest();
 
@@ -106,7 +106,7 @@ public class HubspotTest {
                 }
 
             }
-            
+
 
             Country country = new Country();
             country.setAttendeeCount(max);
@@ -188,10 +188,6 @@ public class HubspotTest {
                 partnerCountryList = new ArrayList<>();
             }
 
-            if (p.getEmail().equals("bmagnani@hubspotpartners.com")) {
-                log.info(p.country);
-
-            }
 
             partnerCountryList.add(p);
             countryPersonMap.put(p.getCountry(), partnerCountryList);
