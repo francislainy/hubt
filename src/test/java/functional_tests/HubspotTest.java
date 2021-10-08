@@ -1,5 +1,7 @@
 package functional_tests;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import functional_tests.model.Country;
 import functional_tests.model.Partner;
 import functional_tests.model.Partners;
@@ -108,21 +110,27 @@ public class HubspotTest {
             }
 
 
+            if (attendeesList.size() == 0) {
+                startDateWithMorePartners = null;
+            }
+
+
             Country country = new Country();
-            country.setAttendeeCount(max);
+            country.setAttendeeCount(attendeesList.size());
             country.setName(countryName);
             country.setStartDate(startDateWithMorePartners);
             country.setAttendees(attendeesList);
             countriesToPostList.add(country);
-
 
         }
 
 
         mapToPost.put("countries", countriesToPostList);
 
+        String serialisedMap = Util.createJsonStringFromClassObject(mapToPost);
+
         RequestSpecification rq = getRequestSpecification();
-        Response resp = rq.body(mapToPost).post("https://candidate.hubteam.com/candidateTest/v3/problem/result?userKey=c967dc4a03fce49243388aef13f7");
+        Response resp = rq.body(serialisedMap).post("https://candidate.hubteam.com/candidateTest/v3/problem/result?userKey=c967dc4a03fce49243388aef13f7");
         assertEquals(200, resp.getStatusCode());
 
     }
@@ -138,7 +146,6 @@ public class HubspotTest {
 
         return Util.createClassFromMap(hashmap, Partners.class);
     }
-
 
     private long getDaysBetween(Object[] keys, int i) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

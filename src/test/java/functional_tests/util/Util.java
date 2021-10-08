@@ -36,9 +36,7 @@ public class Util {
                 .contentType("application/json\r\n")
                 .header("Accept", "application/json").and()
                 .header("Content-Type", "application/json")
-                .redirects().follow(false)
                 .urlEncodingEnabled(false)
-                .relaxedHTTPSValidation()
                 .when()
                 .log()
                 .everything();
@@ -47,8 +45,14 @@ public class Util {
 
     public static <T> T createClassFromMap(HashMap map, Class<T> c) {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        Gson gson = gsonBuilder.create();
+        Gson gson = gsonBuilder.serializeNulls().create();
         String jsonString = gson.toJson(map);
         return gson.fromJson(jsonString, c);
+    }
+
+    public static String createJsonStringFromClassObject(Object object) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson = gsonBuilder.serializeNulls().create();
+        return gson.toJson(object);
     }
 }
