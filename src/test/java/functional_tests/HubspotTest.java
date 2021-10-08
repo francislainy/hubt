@@ -1,7 +1,5 @@
 package functional_tests;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import functional_tests.model.Country;
 import functional_tests.model.Partner;
 import functional_tests.model.Partners;
@@ -20,7 +18,6 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // mvn -Dtest=functional_tests.*Test test
-
 
 @Slf4j
 public class HubspotTest {
@@ -63,10 +60,7 @@ public class HubspotTest {
                     Collections.sort(currentDateList);
                     Collections.sort(nextDateList);
 
-                    // Wrong because it's checking whether all in the array for a date are inside the array for the other date. It should be the most amount only.
-
                     int numElementsBothDates = 0;
-
 
                     for (String nextDate : nextDateList) {
                         for (String currentDate : currentDateList) {
@@ -87,9 +81,7 @@ public class HubspotTest {
 
                     }
 
-
                 }
-
 
             }
 
@@ -99,12 +91,10 @@ public class HubspotTest {
             System.out.println("Attendee count: " + max);
 
 
-            for (Partner p : partners.getPartners()) {
+            for (Partner p : countryPersonMap.get(countryName)) {
 
-                if (p.getCountry().equals(countryName)) {
-                    if (p.getAvailableDates().contains(startDateWithMorePartners) && p.getAvailableDates().contains(endDateWithMorePartners)) {
-                        attendeesList.add(p.getEmail());
-                    }
+                if (p.getAvailableDates().contains(startDateWithMorePartners) && p.getAvailableDates().contains(endDateWithMorePartners)) {
+                    attendeesList.add(p.getEmail());
                 }
 
             }
@@ -135,6 +125,7 @@ public class HubspotTest {
 
     }
 
+
     private Partners getPartnersFromRest() {
 
         RequestSpecification rq = getRequestSpecification();
@@ -147,6 +138,7 @@ public class HubspotTest {
         return Util.createClassFromMap(hashmap, Partners.class);
     }
 
+
     private long getDaysBetween(Object[] keys, int i) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -155,6 +147,7 @@ public class HubspotTest {
 
         return DAYS.between(partnerCurrentLocalDate, partnerNextLocalDate);
     }
+
 
     private HashMap getDateAvailablePartners(HashMap<String, ArrayList<Partner>> countryPersonMap, String countryName) {
 
@@ -182,6 +175,7 @@ public class HubspotTest {
         return datePersonMap;
     }
 
+
     private HashMap getCountryAvailablePartners(Partners partners) {
         HashMap<String, ArrayList<Partner>> countryPersonMap = new HashMap<>();
         for (Partner p : partners.getPartners()) {
@@ -205,4 +199,3 @@ public class HubspotTest {
     }
 
 }
-
