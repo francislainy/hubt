@@ -6,6 +6,7 @@ import functional_tests.model.Partners;
 import functional_tests.util.Util;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 public class HubspotTest {
+
+    Logger logger
+            = Logger.getLogger(
+            HubspotTest.class.getName());
+
 
     @Test
     public void testHubspot() {
@@ -86,9 +92,9 @@ public class HubspotTest {
             }
 
 
-            System.out.println("Country: " + countryName);
-            System.out.println("Date with more partners: " + startDateWithMorePartners);
-            System.out.println("Attendee count: " + max);
+            logger.debug("Country: " + countryName);
+            logger.debug("Date with more partners: " + startDateWithMorePartners);
+            logger.debug("Attendee count: " + max);
 
 
             for (Partner p : countryPersonMap.get(countryName)) {
