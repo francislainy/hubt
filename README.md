@@ -2,18 +2,7 @@
 
 https://github.com/francislainy/hubt/tree/master/src
 
-These can be found under the `test/functional_tests` folder. Their dependencies are under the main pom file for the application.
-
-These tests can be run either through a maven command, or a run button inside your IDE.
-
-To target the test classes through the maven command, we tend to follow a naming pattern, in this case, the class name ending with the word "Test". which is represented by `.*Test` after the package location. 
-The below is a sample for the maven command. Notice we can also provide extra parameters such as which environment we would like our tests to run on.
-
-`mvn -Dtest=functional_tests.*Test test`
-
-When our tests run, we print the curl for the api that is being targeted within the console terminal, which can be useful for debugging purposes. This can be
-changed to a text file or other preferred means as it's controlled by a logback.xml file within the test/resources folder.
-This printing is handled by an external library which exists within the pom file.
+`mvn spring-boot:run`
 
 ## Prior to starting
 
@@ -30,10 +19,14 @@ This printing is handled by an external library which exists within the pom file
 
 ```
 
-
 ![image](https://user-images.githubusercontent.com/19685849/136313713-eae7c532-c006-40dd-ac01-f5aed2a2befe.png)
 
 ![image](https://user-images.githubusercontent.com/19685849/136314289-6fa7f419-a9cc-46e5-9f24-71a4d83534ee.png)
+
+
+PS: When our code runs, we print the curl for the api that is being targeted within the console terminal, which can be useful for debugging purposes. This can be
+changed to a text file or other preferred means as it's controlled by a logback.xml file within the resources folder.
+This printing is handled by an external library which exists within the pom file.
 
 
 https://www.linkedin.com/in/francislainycampos/
