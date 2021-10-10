@@ -44,7 +44,6 @@ public class Hubspot {
             HashMap<String, ArrayList<String>> datePersonMap = getDateAvailablePartners(countryPersonMap, countryName);
 
 
-            ArrayList<String> attendeesList = new ArrayList<>();
             TreeMap<String, ArrayList<String>> treeMap = new TreeMap<>(datePersonMap); // Sorting the map to make sure the dates are in a sequence
 
             int max = 0;
@@ -95,25 +94,14 @@ public class Hubspot {
             logger.debug("Attendee count: " + max);
 
 
-            for (Partner p : countryPersonMap.get(countryName)) {
-
-                if (p.getAvailableDates().contains(startDateWithMorePartners) && p.getAvailableDates().contains(endDateWithMorePartners)) {
-                    attendeesList.add(p.getEmail());
-                }
-
-            }
-
+            ArrayList<String> attendeesList = getAttendeesList(countryPersonMap, countryName, startDateWithMorePartners, endDateWithMorePartners);
 
             if (attendeesList.size() == 0) {
                 startDateWithMorePartners = null;
             }
 
 
-            Country country = new Country();
-            country.setAttendeeCount(attendeesList.size());
-            country.setName(countryName);
-            country.setStartDate(startDateWithMorePartners);
-            country.setAttendees(attendeesList);
+            Country country = new Country(attendeesList.size(), attendeesList, countryName, startDateWithMorePartners);
             countriesToPostList.add(country);
 
         }
@@ -125,6 +113,20 @@ public class Hubspot {
         RequestSpecification rq = getRequestSpecification();
         rq.body(serialisedMap).post("https://candidate.hubteam.com/candidateTest/v3/problem/result?userKey=c967dc4a03fce49243388aef13f7");
 
+    }
+
+    private ArrayList<String> getAttendeesList(HashMap<String, ArrayList<Partner>> countryPersonMap, String countryName, String startDateWithMorePartners, String endDateWithMorePartners) {
+        ArrayList<String> attendeesList = new ArrayList<>();
+
+        for (Partner p : countryPersonMap.get(countryName)) {
+
+            if (p.getAvailableDates().contains(startDateWithMorePartners) && p.getAvailableDates().contains(endDateWithMorePartners)) {
+                attendeesList.add(p.getEmail());
+            }
+
+        }
+
+        return attendeesList;
     }
 
 
@@ -195,7 +197,6 @@ public class Hubspot {
 
         return countryPersonMap;
     }
-
 
 
     public static void main(String[] args) {
