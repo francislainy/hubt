@@ -1,4 +1,4 @@
-## Hubspot Functional tests
+## Hubspot test
 
 https://github.com/francislainy/hubt/tree/master/src
 
